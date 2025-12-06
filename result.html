@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detailed Results</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* NEW GRID LAYOUT STYLE */
+        .profile-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; /* Two Columns */
+            gap: 15px; 
+            text-align: left; 
+            margin-top: 10px;
+        }
+        .p-item { display: flex; flex-direction: column; }
+        .p-label { font-size: 0.75rem; color: #888; margin-bottom: 2px; }
+        .p-val { font-size: 0.95rem; font-weight: bold; color: #333; }
+    </style>
+</head>
+<body style="background:#f4f6f9;">
+    <div class="main-wrapper">
+        <header style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:1.5rem; font-weight:bold; color:#444;">Result <span style="color:var(--primary);">Report</span></div>
+            <a href="index.html" class="action-btn" style="width:auto; text-decoration:none; padding:8px 15px;">&larr; Back</a>
+        </header>
+
+        <div id="reportContainer"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const stored = sessionStorage.getItem("sbtetData");
+            if (!stored) {
+                alert("No data found. Please search again.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            const data = JSON.parse(stored);
+            const container = document.getElementById("reportContainer");
+            const profile = data.profile;
+
+            // 1. HEADER (Updated to Grid Layout)
+            const headerHtml = `
+                <div class="card" style="margin-bottom:20px;">
+                    <h2 style="margin:0 0 15px 0; text-align:center; color:var(--primary);">${profile.StudentName}</h2>
+                    <div class="profile-grid">
+                        <div class="p-item"><span class="p-label">PIN</span><span class="p-val">${profile.Pin}</span></div>
+                        <div class="p-item"><span class="p-label">Branch</span><span class="p-val">${profile.BranchName}</span></div>
+                        <div class="p-item" style="grid-column: span 2;"><span class="p-label">College</span><span class="p-val">${profile.CollegeCode}</span></div>
+                    </div>
+                </div>
+            `;
+            container.innerHTML = headerHtml;
+
+            // 2. RESULTS
+            data.results.forEach(sem => {
+                let tableHtml = `
+                    <div class="card" style="margin-bottom:20px; padding:0; overflow:hidden;">
+                        <div style="background:#6c5ce7; color:white; padding:10px 15px; font-weight:bold;">
+                            Semester ${sem.semId}
+                        </div>
+                        <div style="overflow-x:auto;">
+                            <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+                                <thead>
+                                    <tr style="background:#f8f9fa; border-bottom:2px solid #eee;">
+                                        <th style="padding:10px; text-align:left;">Subject</th>
+                                        <th style="padding:10px;">Mid1</th>
+                                        <th style="padding:10px;">Mid2</th>
+                                        <th style="padding:10px;">Int</th>
+                                        <th style="padding:10px;">End</th>
+                                        <th style="padding:10px;">Total</th>
+                                        <th style="padding:10px;">Grade</th>
+                                        <th style="padding:10px;">Cr</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                `;
+
+                sem.subjects.forEach(sub => {
+                    const endMarks = parseInt(sub.EndSemMarks);
+                    const isFail = (sub.HybridGrade === "F" || sub.HybridGrade === "Ab" || (!isNaN(endMarks) && endMarks < 14));
+                    const color = isFail ? "#e74c3c" : "#2ecc71";
+                    
+                    tableHtml += `
+                        <tr style="border-bottom:1px solid #f1f1f1;">
+                            <td style="padding:10px; font-weight:500;">${sub.SubjectName}</td>
+                            <td style="padding:10px; text-align:center;">${sub.MID1_MARKS || "-"}</td>
+                            <td style="padding:10px; text-align:center;">${sub.MID2_MARKS || "-"}</td>
+                            <td style="padding:10px; text-align:center;">${sub.Internal_MARKS || "-"}</td>
+                            <td style="padding:10px; text-align:center;">${sub.EndSemMarks || "-"}</td>
+                            <td style="padding:10px; text-align:center; font-weight:bold;">${sub.SubjectTotal}</td>
+                            <td style="padding:10px; text-align:center; color:${color}; font-weight:bold;">${sub.HybridGrade}</td>
+                            <td style="padding:10px; text-align:center;">${sub.CreditsGained}</td>
+                        </tr>
+                    `;
+                });
+
+                // SGPA ROW (Fixed!)
+                tableHtml += `
+                                <tr style="background:#fffcf5; border-top:2px solid #eee;">
+                                    <td colspan="6" style="padding:12px; text-align:right; font-weight:bold; color:#555;">Semester SGPA:</td>
+                                    <td colspan="2" style="padding:12px; text-align:center; font-weight:bold; font-size:1.2rem; color:#e67e22;">${sem.sgpa}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                `;
+                container.innerHTML += tableHtml;
+            });
+        });
+    </script>
+</body>
+</html>

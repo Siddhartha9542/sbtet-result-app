@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBTET Portal Access</title>
+    <link rel="stylesheet" href="style.css">
+    <script type="module" src="js/auth-guard.js"></script>
+</head>
+<body class="auth-body">
+    <div class="auth-card">
+        <div class="tab-header">
+            <div class="tab active" id="tabLogin">Login</div>
+            <div class="tab" id="tabSignup">Sign Up</div>
+            <div class="slider" id="tabSlider"></div>
+        </div>
+
+        <div class="form-container">
+            <h2 id="formTitle" style="margin-top:0; color:#333;">Welcome Back</h2>
+            
+            <form id="authForm">
+                <div class="input-group hidden-field" id="nameField">
+                    <input type="text" id="regName" class="input" placeholder="Full Name">
+                </div>
+
+                <input type="email" id="email" class="input" placeholder="Email Address" required>
+                <input type="password" id="pass" class="input" placeholder="Password" required>
+
+                <button type="submit" id="authBtn" class="action-btn">Log In</button>
+            </form>
+            
+            <p id="errorMsg" style="color:#e74c3c; font-size:0.85rem; margin-top:15px; text-align:center; min-height:20px;"></p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { app } from "./js/firebase-config.js";
+        
+        const auth = getAuth(app);
+        let isLoginMode = true;
+
+        // UI Elements
+        const tabLogin = document.getElementById('tabLogin');
+        const tabSignup = document.getElementById('tabSignup');
+        const slider = document.getElementById('tabSlider');
+        const nameField = document.getElementById('nameField');
+        const btn = document.getElementById('authBtn');
+        const title = document.getElementById('formTitle');
+        const authForm = document.getElementById('authForm');
+        const errorText = document.getElementById('errorMsg');
+
+        // Tab Switching Logic
+        function switchTab(mode) {
+            isLoginMode = mode === 'login';
+            errorText.innerText = "";
+            authForm.reset();
+            
+            if (isLoginMode) {
+                slider.style.transform = "translateX(0)";
+                tabLogin.classList.add('active');
+                tabSignup.classList.remove('active');
+                nameField.classList.remove('show');
+                btn.innerText = "Log In";
+                title.innerText = "Welcome Back";
+            } else {
+                slider.style.transform = "translateX(100%)";
+                tabSignup.classList.add('active');
+                tabLogin.classList.remove('active');
+                nameField.classList.add('show');
+                btn.innerText = "Sign Up";
+                title.innerText = "Create Account";
+            }
+        }
+
+        tabLogin.addEventListener('click', () => switchTab('login'));
+        tabSignup.addEventListener('click', () => switchTab('signup'));
+
+        // --- AUTH LOGIC (The Fix) ---
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // STOPS PAGE RELOAD (Fixes Blank Screen)
+
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('pass').value;
+            
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+            errorText.innerText = "";
+
+            try {
+                if (isLoginMode) {
+                    // --- LOGIN FLOW ---
+                    const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+                    const user = userCredential.user;
+                    
+                    console.log("Login Success:", user.email);
+
+                    // Redirect Logic
+                    if (user.email === "admin@sbtet.com") {
+                        window.location.href = "admin.html";
+                    } else {
+                        window.location.href = "index.html";
+                    }
+
+                } else {
+                    // --- SIGNUP FLOW ---
+                    await createUserWithEmailAndPassword(auth, email, pass);
+                    alert("Account Created! Please Log In.");
+                    switchTab('login');
+                }
+            } catch (err) {
+                console.error("Auth Error:", err);
+                let msg = err.message.replace("Firebase:", "").trim();
+                
+                // Friendly Error Messages
+                if (msg.includes("auth/user-not-found") || msg.includes("auth/invalid-credential")) {
+                    msg = "Invalid Email or Password.";
+                } else if (msg.includes("auth/email-already-in-use")) {
+                    msg = "Email already registered.";
+                } else if (msg.includes("auth/network-request-failed")) {
+                    msg = "Network Error. Check Internet.";
+                }
+                
+                errorText.innerText = msg;
+            } finally {
+                btn.disabled = false;
+                btn.innerText = isLoginMode ? "Log In" : "Sign Up";
+            }
+        });
+    </script>
+</body>
+</html>

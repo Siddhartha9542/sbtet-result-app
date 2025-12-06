@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="js/auth-guard.js"></script>
+    <style>
+        /* NEW PROFILE GRID STYLE */
+        .profile-details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 Columns */
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .detail-label {
+            font-size: 0.75rem; /* Smaller font */
+            color: #888;
+            margin-bottom: 3px;
+        }
+        .detail-val {
+            font-size: 0.9rem; /* Smaller font */
+            font-weight: 700;
+            color: #333;
+            word-break: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <header style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:1.5rem; font-weight:bold; color:#444;">SBTET <span style="color:var(--primary);">Live</span></div>
+            <button id="logoutBtn" class="action-btn" style="width:auto; padding:8px 15px; background:#e74c3c; font-size:0.9rem;">Logout</button>
+        </header>
+
+        <div class="container split-view">
+            <div class="left-panel" id="searchSection">
+                <div class="card">
+                    <h3 style="margin-top:0;">Search Student</h3>
+                    <input type="text" id="pinInput" class="input" placeholder="Enter PIN (e.g. 23007-CS-056)">
+                    <button id="searchBtn" class="action-btn">Get Result</button>
+                </div>
+            </div>
+
+            <div class="right-panel hidden" id="dashboard">
+                
+                <div class="card profile-card">
+                    <div class="profile-header">STUDENT PROFILE</div>
+                    <div class="profile-details" style="padding:20px;">
+                        
+                        <div class="profile-details-grid">
+                            <div class="detail-item">
+                                <span class="detail-label">Name</span>
+                                <span class="detail-val" id="studentName">--</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Pin</span>
+                                <span class="detail-val" id="studentPin">--</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Branch</span>
+                                <span class="detail-val" id="studentBranch">--</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">College</span>
+                                <span class="detail-val" id="studentCollege">--</span>
+                            </div>
+                        </div>
+
+                        <div class="stats-container">
+                            <div class="stat-box orange">
+                                <small>Current CGPA</small>
+                                <h2 id="avgCgpa">0.0</h2>
+                            </div>
+                            <div class="stat-box pink">
+                                <small>Backlogs</small>
+                                <h2 id="backlogCount">0</h2>
+                            </div>
+                        </div>
+                        
+                        <button id="openResultPageBtn" class="action-btn" style="background:#333; margin-top:20px;">
+                            Click here for Result &rarr;
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top:20px;">
+                    <div class="graph-header">
+                        <h3 style="margin:0;">Performance Graph (SGPA)</h3>
+                    </div>
+                    <div style="height:250px;">
+                        <canvas id="performanceChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="js/script.js"></script>
+
+    <script type="module">
+        import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+        import { app } from "./js/firebase-config.js";
+
+        const auth = getAuth(app);
+        const btn = document.getElementById('logoutBtn');
+        
+        btn.addEventListener('click', () => {
+            if(confirm("Are you sure you want to log out?")) {
+                // signOut triggers auth-guard.js, which will redirect to auth.html automatically
+                signOut(auth).catch((error) => {
+                    console.error("Logout Error:", error);
+                    alert("Logout failed. Check console.");
+                });
+            }
+        });
+    </script>
+</body>
+</html>

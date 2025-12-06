@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBTET Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    </head>
+<body style="background:#fdfbf7;">
+    
+    <div class="main-wrapper">
+        <header style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:1.5rem; font-weight:bold; color:#444;">Admin <span style="color:var(--primary);">Control</span></div>
+            <a href="index.html" class="action-btn" style="width:auto; text-decoration:none; padding:8px 15px; background:#333;">&larr; Student View</a>
+        </header>
+
+        <div class="card">
+            <h3 style="margin-top:0; color:var(--primary); border-bottom:1px solid #eee; padding-bottom:10px;">Bulk Data Scraper</h3>
+            
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <input id="startPin" class="input" placeholder="Start PIN (e.g. 23007-CS-001)">
+                <input id="stopPin" class="input" placeholder="Stop PIN (e.g. 23007-CS-005)">
+            </div>
+            
+            <button id="bulkFetchBtn" class="action-btn">Start Fetching</button>
+            
+            <div style="margin-top:15px;">
+                <p id="statusText" style="color:#666; font-size:0.9rem; margin-bottom:5px;">Ready</p>
+                <div style="width:100%; height:8px; background:#eee; border-radius:4px; overflow:hidden;">
+                    <div id="progressBar" style="width:0%; height:100%; background:var(--primary); transition:width 0.3s;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:20px; padding:0; overflow:hidden;">
+            <div style="padding:15px; background:#fff; border-bottom:1px solid #eee; display:flex; gap:10px; justify-content:flex-end;">
+                <button id="sortBtn" class="action-btn" style="width:auto; background:#6c5ce7; font-size:0.9rem; padding:8px 15px;">
+                    Sort by Avg SGPA ⬇
+                </button>
+                <button id="downloadExcelBtn" class="action-btn" style="width:auto; background:#27ae60; font-size:0.9rem; padding:8px 15px; display:none;">
+                    Download Excel 📥
+                </button>
+            </div>
+            <div style="overflow-x:auto;">
+                <table style="width:100%; font-size:0.85rem; border-collapse:collapse; min-width:800px;">
+                    <thead id="tableHead">
+                        <tr style="background:#f8f9fa; text-align:left;">
+                            <th style="padding:10px;">Name</th>
+                            <th style="padding:10px;">PIN</th>
+                            <th style="padding:10px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bulkTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+            <h3 style="margin-top:0; color:var(--primary);">Configuration Master</h3>
+            <p style="font-size:0.8rem; color:#666; margin-bottom:15px;">View and Create Exam IDs for Batches.</p>
+
+            <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #eee;">
+                <h4 style="margin-top:0;">Add / Update Batch</h4>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <input id="newBatch" class="input" placeholder="Batch (e.g. 25)">
+                    <input id="newScheme" class="input" placeholder="Scheme ID (e.g. 11)">
+                </div>
+                <input id="newSems" class="input" placeholder="Sem IDs (Format: 1:85, 2:91, 3:95)" style="margin-top:10px;">
+                <button id="saveBatchBtn" class="action-btn" style="margin-top:10px; background:#333;">Save Configuration</button>
+            </div>
+
+            <table style="width:100%; font-size:0.85rem; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#333; color:white; text-align:left;">
+                        <th style="padding:10px;">Batch</th>
+                        <th style="padding:10px;">Scheme</th>
+                        <th style="padding:10px;">Exam IDs (Sem:ID)</th>
+                    </tr>
+                </thead>
+                <tbody id="configTableBody"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script type="module" src="js/admin.js"></script>
+</body>
+</html>
