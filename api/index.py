@@ -1,11 +1,18 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import requests
+import os
 
-app = Flask(__name__)
+# This tells Flask: "Look for HTML files in the folder above this one"
+app = Flask(__name__, static_folder='../', static_url_path='')
 CORS(app)
 
-# Updated Route to match Vercel path
+# 1. Route to show the Website
+@app.route('/')
+def home():
+    return send_from_directory('../', 'index.html')
+
+# 2. Route for the API
 @app.route('/api/get_result', methods=['GET'])
 def get_result():
     pin = request.args.get('pin')
@@ -26,11 +33,12 @@ def get_result():
     }
 
     try:
+        # verify=False helps avoid SSL errors on some networks
         response = requests.get(url, headers=headers, verify=False, timeout=10)
         return jsonify(response.json())
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# Vercel handles the execution, so we don't need app.run() for deployment
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Run on all available networks
+    app.run(host='0.0.0.0', port=5000)
